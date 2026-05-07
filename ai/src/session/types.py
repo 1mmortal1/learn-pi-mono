@@ -12,6 +12,7 @@ class SessionNode(BaseModel):
     messages: list[Message] = Field(default_factory=list)
     created_at: int
 
+
 class Session(BaseModel):
     id: str
     current_node_id: str | None = None

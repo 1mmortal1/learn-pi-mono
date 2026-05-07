@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import time 
-
+import time
 import uuid
 
-from .types import Session, SessionNode
 from ..llm.types import Message
+from .types import Session, SessionNode
+
 
 class SessionManager:
     def create_session(self) -> Session:
@@ -15,19 +15,18 @@ class SessionManager:
             nodes={},
             created_at=self._now(),
         )
-    
+
     def get_current_node(self, session: Session) -> SessionNode | None:
         if session.current_node_id is None:
             return None
         return session.nodes.get(session.current_node_id)
-    
 
     def get_current_messages(self, session: Session) -> list[Message]:
         current_node = self.get_current_node(session)
         if current_node is None:
             return []
         return list(current_node.messages)
-    
+
     def create_root_node(
         self,
         session: Session,
@@ -47,7 +46,7 @@ class SessionManager:
         session.nodes[node.id] = node
         session.current_node_id = node.id
         return node
-    
+
     def create_child_node(
         self,
         session: Session,
@@ -69,7 +68,7 @@ class SessionManager:
         current_node.children_ids.append(node.id)
         session.current_node_id = node.id
         return node
-    
+
     def set_current_node(self, session: Session, node_id: str) -> None:
         if node_id not in session.nodes:
             raise RuntimeError(f"Node '{node_id}' not found.")
@@ -91,13 +90,16 @@ class SessionManager:
 
         return children
 
+    def list_nodes(self, session: Session) -> list[SessionNode]:
+        return sorted(session.nodes.values(), key=lambda node: node.created_at)
+
     def _new_id(self) -> str:
         return str(uuid.uuid4())
 
     def _now(self) -> int:
         return int(time.time() * 1000)
-    
-    def checkout_node(self, session:Session, node_id: str) -> None:
+
+    def checkout_node(self, session: Session, node_id: str) -> None:
         if node_id not in session.nodes:
             raise RuntimeError(f"Node '{node_id}' not found.")
         session.current_node_id = node_id
@@ -124,7 +126,7 @@ class SessionManager:
         parent_node.children_ids.append(node.id)
         session.current_node_id = node.id
         return node
-    
+
     def get_path_to_current(self, session: Session) -> list[SessionNode]:
         current_node = self.get_current_node(session)
         if current_node is None:

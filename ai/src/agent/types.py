@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from pydantic import BaseModel
-
 from typing import Literal
 
-from ..llm.types import AssistantMessage, ToolCallPart, ToolResultMessage
+from pydantic import BaseModel
 
+from ..llm.types import AssistantMessage, ToolCallPart
 
 
 class ToolExecutionResult(BaseModel):
@@ -18,46 +17,67 @@ class ToolExecutionResult(BaseModel):
 class ToolContext(BaseModel):
     session_id: str | None = None
 
-class RunStartEvent(BaseModel):
+
+class AgentEventBase(BaseModel):
+    session_id: str
+    node_id: str | None = None
+    run_id: str
+    turn_index: int | None = None
+    timestamp: int
+
+
+class RunStartEvent(AgentEventBase):
     type: Literal["run_start"] = "run_start"
 
 
-class RunEndEvent(BaseModel):
+class RunEndEvent(AgentEventBase):
     type: Literal["run_end"] = "run_end"
     message: AssistantMessage
 
 
-class TurnStartEvent(BaseModel):
+class TurnStartEvent(AgentEventBase):
     type: Literal["turn_start"] = "turn_start"
 
-class TurnEndEvent(BaseModel):
+
+class TurnEndEvent(AgentEventBase):
     type: Literal["turn_end"] = "turn_end"
 
-class AssistantMessageEvent(BaseModel):
+
+class AssistantMessageEvent(AgentEventBase):
     type: Literal["assistant_message"] = "assistant_message"
     message: AssistantMessage
 
 
-class ToolCallExecutionStartEvent(BaseModel):
+class AssistantTextDeltaEvent(AgentEventBase):
+    type: Literal["assistant_text_delta"] = "assistant_text_delta"
+    content_index: int
+    delta: str
+    message: AssistantMessage
+
+
+class ToolCallExecutionStartEvent(AgentEventBase):
     type: Literal["tool_call_execution_start"] = "tool_call_execution_start"
     tool_call: ToolCallPart
 
 
-class ToolCallExecutionEndEvent(BaseModel):
+class ToolCallExecutionEndEvent(AgentEventBase):
     type: Literal["tool_call_execution_end"] = "tool_call_execution_end"
     tool_call: ToolCallPart
-    result: ToolResultMessage
+    result: ToolExecutionResult
 
 
-class AbortedEvent(BaseModel):
+class AbortedEvent(AgentEventBase):
     type: Literal["aborted"] = "aborted"
+    reason: str | None = None
 
 
 AgentEvent = (
     RunStartEvent
     | RunEndEvent
     | TurnStartEvent
+    | TurnEndEvent
     | AssistantMessageEvent
+    | AssistantTextDeltaEvent
     | ToolCallExecutionStartEvent
     | ToolCallExecutionEndEvent
     | AbortedEvent

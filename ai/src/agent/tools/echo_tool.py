@@ -8,7 +8,18 @@ from ..base import Tool
 class EchoTool:
     name = "echo"
     description = "Return the same text passed in the arguments."
+    parameters = {
+        "type": "object",
+        "properties": {
+            "text": {
+                "type": "string",
+                "description": "Text to return.",
+            },
+        },
+        "required": ["text"],
+        "additionalProperties": False,
+    }
 
     async def execute(self, arguments: dict[str, Any]) -> str:
-        text = arguments.get("text", "")
+        text = arguments["text"]
         return str(text)

@@ -21,4 +21,11 @@ def register_builtins() -> None:
     else:
         register_api_provider(OpenAIResponsesProvider())
 
+    try:
+        from .openai_chat_completions import OpenAIChatCompletionsProvider
+    except ModuleNotFoundError:
+        pass
+    else:
+        register_api_provider(OpenAIChatCompletionsProvider())
+
     _registered = True

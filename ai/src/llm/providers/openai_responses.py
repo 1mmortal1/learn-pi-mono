@@ -37,10 +37,14 @@ class OpenAIResponsesProvider:
     async def complete(self, model: ModelSpec, context: Context) -> AssistantMessage:
         return await self.stream(model, context).result()
 
-    def stream_simple(self, model: ModelSpec, context: Context) -> EventStream[AssistantEvent, AssistantMessage]:
+    def stream_simple(
+        self, model: ModelSpec, context: Context
+    ) -> EventStream[AssistantEvent, AssistantMessage]:
         return self.stream(model, context)
 
-    def stream(self, model: ModelSpec, context: Context) -> EventStream[AssistantEvent, AssistantMessage]:
+    def stream(
+        self, model: ModelSpec, context: Context
+    ) -> EventStream[AssistantEvent, AssistantMessage]:
         response_stream = EventStream[AssistantEvent, AssistantMessage]()
 
         async def produce() -> None:
@@ -100,13 +104,13 @@ class OpenAIResponsesProvider:
         return response_stream
 
     def _build_client(self, model: ModelSpec) -> AsyncOpenAI:
-        if not self._api_key:
+        api_key = self._api_key or os.getenv("OPENAI_API_KEY")
+        if not api_key:
             raise LLMConfigurationError("OPENAI_API_KEY is required.")
         return AsyncOpenAI(
-            api_key=self._api_key,
+            api_key=api_key,
             base_url=model.base_url or self._base_url,
         )
-
 
     def _build_message(
         self,

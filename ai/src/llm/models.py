@@ -22,7 +22,10 @@ class ModelSpec(BaseModel):
     base_url: str | None = None
     headers: dict[str, str] = Field(default_factory=dict)
     reasoning: bool = False
-    input_modalities: list[Literal["text", "image", "file"]] = Field(default_factory=lambda: ["text"])
+    input_modalities: list[Literal["text", "image", "file"]] = Field(
+        default_factory=lambda: ["text"]
+    )
+    supports_tools: bool = False
     cost: ModelCost = Field(default_factory=ModelCost)
     context_window: int | None = None
     max_output_tokens: int | None = None
